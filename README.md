@@ -1,2 +1,2 @@
 # ConvenientSqliteForUnity
-XV‚µ‚Ü‚µ‚½B
+æ›´æ–°ã—ã¾ã—ãŸã€‚
