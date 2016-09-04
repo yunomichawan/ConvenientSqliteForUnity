@@ -10,11 +10,11 @@ public class SqliteTestScript : MonoBehaviour {
         // 1.セレクトしたいテーブルで初期化
         DataAccess.Instance.Init(typeof(CharacterData));
         // 2.自動生成されるセレクト文を実行しデータを取得
-        List<CharacterData> characterDataList = DataAccess.Instance.GetDataList<CharacterData>(true);
+        List<CharacterData> characterDataList = DataAccess.Instance.GetDataList<CharacterData>();
 
         // セレクト方法その2
         DataAccess.Instance.Init(typeof(CharacterData));
-        DataTable dataTable = DataAccess.Instance.GetDataTable(true);
+        DataTable dataTable = DataAccess.Instance.GetDataTable();
         List<CharacterData> characterDataList2 = DataBinding<CharacterData>.DataTableToObjectList(dataTable);
 
         // セレクト方法その3

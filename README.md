@@ -1,2 +1,4 @@
 # ConvenientSqliteForUnity
-更新しました。
+===
+
+Each description is being organized (README.md, comment statement in the source file ) .

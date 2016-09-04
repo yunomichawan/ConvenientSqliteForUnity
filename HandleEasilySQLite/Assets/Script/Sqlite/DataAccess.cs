@@ -4,6 +4,17 @@ using System.Reflection;
 using System.Text;
 using UnityEngine;
 
+/* 
+ *
+ *
+ *
+ *
+ *
+ *
+ *
+ *
+*/
+
 public class DataAccess : SingletonComponent<DataAccess>
 {
     private const string CONNECT_TABLE = "SampleDb.db";
@@ -358,18 +369,14 @@ public class DataAccess : SingletonComponent<DataAccess>
     /// セレクトSQL文発行
     /// </summary>
     /// <typeparam name="T"></typeparam>
-    /// <param name="isRun">SQL発行フラグ</param>
     /// <returns></returns>
-    public List<T> GetDataList<T>(bool isRun)
+    public List<T> GetDataList<T>()
     {
         try
         {
-            if (isRun)
-            {
-                this.CreateSelectSql();
-                SqliteDatabase sqliteDataBase = new SqliteDatabase(CONNECT_TABLE);
-                this.SelectTable = sqliteDataBase.ExecuteQuery(this.ExecutetSql.ToString());
-            }
+            this.CreateSelectSql();
+            SqliteDatabase sqliteDataBase = new SqliteDatabase(CONNECT_TABLE);
+            this.SelectTable = sqliteDataBase.ExecuteQuery(this.ExecutetSql.ToString());
         }
         catch (SqliteException ex)
         {
@@ -387,19 +394,15 @@ public class DataAccess : SingletonComponent<DataAccess>
     /// <summary>
     /// セレクトSQL文発行
     /// </summary>
-    /// <param name="isRun">SQL発行フラグ</param>
     /// <returns></returns>
-    public DataTable GetDataTable(bool isRun)
+    public DataTable GetDataTable()
     {
         try
         {
-            if (isRun)
-            {
-                this.CreateSelectSql();
-                SqliteDatabase sqliteDataBase = new SqliteDatabase(CONNECT_TABLE);
-                this.SelectTable = sqliteDataBase.ExecuteQuery(this.ExecutetSql.ToString());
-                Debug.Log(this.ExecutetSql.ToString());
-            }
+            this.CreateSelectSql();
+            SqliteDatabase sqliteDataBase = new SqliteDatabase(CONNECT_TABLE);
+            this.SelectTable = sqliteDataBase.ExecuteQuery(this.ExecutetSql.ToString());
+            Debug.Log(this.ExecutetSql.ToString());
         }
         catch (SqliteException ex)
         {
@@ -416,7 +419,6 @@ public class DataAccess : SingletonComponent<DataAccess>
     /// <summary>
     /// セレクトSQL文発行
     /// </summary>
-    /// <param name="isRun">SQL発行フラグ</param>
     /// <returns></returns>
     public DataTable GetDataTable(string sql)
     {
@@ -441,19 +443,15 @@ public class DataAccess : SingletonComponent<DataAccess>
     /// セレクトSQL文発行
     /// </summary>
     /// <typeparam name="T"></typeparam>
-    /// <param name="isRun">SQL発行フラグ</param>
     /// <returns></returns>
-    public T GetDataFirst<T>(bool isRun)
+    public T GetDataFirst<T>()
     {
         try
         {
-            if (isRun)
-            {
-                this.CreateSelectSql();
-                SqliteDatabase sqliteDataBase = new SqliteDatabase(CONNECT_TABLE);
-                Debug.Log(ExecutetSql.ToString());
-                this.SelectTable = sqliteDataBase.ExecuteQuery(this.ExecutetSql.ToString());
-            }
+            this.CreateSelectSql();
+            SqliteDatabase sqliteDataBase = new SqliteDatabase(CONNECT_TABLE);
+            Debug.Log(ExecutetSql.ToString());
+            this.SelectTable = sqliteDataBase.ExecuteQuery(this.ExecutetSql.ToString());
 
             if (this.SelectTable.Rows.Count.Equals(0))
             {
