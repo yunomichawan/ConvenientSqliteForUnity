@@ -8,6 +8,7 @@ public class DataBinding<T>
 {
     /// <summary>
     /// データテーブルからリストに変換
+    /// Conversion from the data table to list
     /// </summary>
     /// <param name="table"></param>
     /// <returns></returns>
@@ -26,6 +27,7 @@ public class DataBinding<T>
 
     /// <summary>
     /// データ行からクラスに変換
+    /// Conversion from the data line to the class
     /// </summary>
     /// <param name="dataRow"></param>
     /// <param name="obj"></param>
@@ -119,6 +121,7 @@ public class DataBinding<T>
 
     /// <summary>
     /// 指定プロパティに値を加算(対応型：int)
+    /// It adds a value to the specified property(type : int)
     /// </summary>
     /// <param name="obj"></param>
     /// <param name="propertyName"></param>

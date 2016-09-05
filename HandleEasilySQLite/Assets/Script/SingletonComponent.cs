@@ -15,7 +15,7 @@ public class SingletonComponent<T> : MonoBehaviour where T : MonoBehaviour
                 instance = (T)FindObjectOfType(t);
                 if (instance == null)
                 {
-                    Debug.LogError(t + " をアタッチしているObjectはありません");
+                    Debug.LogError(t);
                 }
             }
 
@@ -25,21 +25,12 @@ public class SingletonComponent<T> : MonoBehaviour where T : MonoBehaviour
 
     virtual protected void Awake()
     {
-        // 他のObjectにアタッチされているか調べる.
-        // アタッチされている場合は破棄する.
         if (this != Instance)
         {
             Destroy(this);
-            //Destroy(this.gameObject);
-            Debug.LogError(
-                typeof(T) +
-                " は既に他のObjectにアタッチされているため、コンポーネントを破棄しました." +
-                " アタッチされているObjectは " + Instance.gameObject.name + " です.");
             return;
         }
-
-        // なんとかManager的なSceneを跨いでこのGameObjectを有効にしたい場合は
-        // ↓コメントアウト外してください.
+        
         //DontDestroyOnLoad(this.gameObject);
     }
 }

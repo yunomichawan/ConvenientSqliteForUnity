@@ -2,6 +2,7 @@
 
 /// <summary>
 /// テーブルのベースクラス
+/// Base class of table
 /// </summary>
 public class TableBase
 {

@@ -1,4 +1,8 @@
-﻿[DataAccess("CharacterTable")]
+﻿/// <summary>
+/// Table class of CharacterTable
+/// CharacterTableのテーブルクラス
+/// </summary>
+[DataAccess("CharacterTable")]
 public class CharacterData : TableBase
 {
     [DataProperty(5, DataPropertyAttribute.SQLITE_TYPE.TEXT, false, true)]
@@ -7,7 +11,7 @@ public class CharacterData : TableBase
     [DataProperty(128, DataPropertyAttribute.SQLITE_TYPE.TEXT, false, false)]
     public string Name { get; set; }
 
-    [DataProperty(3, DataPropertyAttribute.SQLITE_TYPE.NUMERIC, false, true)]
+    [DataProperty(3, DataPropertyAttribute.SQLITE_TYPE.NUMERIC, false, false)]
     public int Level { get; set; }
 
     [DataProperty(6, DataPropertyAttribute.SQLITE_TYPE.NUMERIC, false, false)]

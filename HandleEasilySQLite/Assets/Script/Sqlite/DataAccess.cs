@@ -34,10 +34,11 @@ public class DataAccess : SingletonComponent<DataAccess>
     private Type BaseType;
     private DataTable SelectTable { get; set; }
 
-    #region 初期化
+    #region 初期化 Initialization
 
     /// <summary>
-    /// コンストラクタ
+    /// constructor
+    /// コンストラクタ 
     /// </summary>
     public DataAccess()
     {
@@ -50,6 +51,7 @@ public class DataAccess : SingletonComponent<DataAccess>
     }
 
     /// <summary>
+    /// constructor
     /// コンストラクタ
     /// </summary>
     /// <param name="type"></param>
@@ -66,8 +68,10 @@ public class DataAccess : SingletonComponent<DataAccess>
     }
 
     /// <summary>
+    /// Init
     /// 初期化
     /// </summary>
+    /// <param name="type"></param>
     public void Init(Type type)
     {
         ExecutetSql = new StringBuilder();
@@ -82,65 +86,76 @@ public class DataAccess : SingletonComponent<DataAccess>
 
     #endregion
 
-    #region 条件設定
+    #region 条件設定 Condition setting
 
     /// <summary>
+    /// Setting conditional statement
     /// 条件文設定
     /// </summary>
     /// <param name="column"></param>
     /// <param name="value"></param>
-    /// <param name="andOr"></param>
+    /// <param name="type"></param>
+    /// <param name="equal"></param>
     public void AddCondition(string column, object value, Type type, bool equal)
     {
         if (value == null) return;
         this.AddOperator(true);
-        DataAccessAttribute attribute = this.GetDataAccessAttribute(type);
+        DataAccessAttribute attribute = this.GetDataAccessAttribute<DataAccessAttribute>(type);
         AddConditionValue(column, attribute, value.ToString(), equal);
     }
 
     /// <summary>
+    /// Conditional statement (in) setting
     /// 条件文(in)設定
     /// </summary>
     /// <param name="column"></param>
-    /// <param name="value"></param>
-    /// <param name="andOr"></param>
+    /// <param name="values"></param>
+    /// <param name="type"></param>
+    /// <param name="equal"></param>
     public void AddInCondition(string column, string[] values, Type type, bool equal = true)
     {
         if (values == null) return;
         this.AddOperator(true);
-        DataAccessAttribute attribute = this.GetDataAccessAttribute(type);
+        DataAccessAttribute attribute = this.GetDataAccessAttribute<DataAccessAttribute>(type);
         AddInConditionValue(column, attribute, values, equal);
     }
 
     /// <summary>
+    /// Additional configuration conditional statement
     /// 条件文追加設定
     /// </summary>
     /// <param name="column"></param>
     /// <param name="value"></param>
-    /// <param name="andOr"></param>
+    /// <param name="type"></param>
+    /// <param name="isAnd"></param>
+    /// <param name="equal"></param>
     public void AddCondition(string column, object value, Type type, bool isAnd, bool equal)
     {
         if (value == null) return;
         this.AddOperator(isAnd);
-        DataAccessAttribute attribute = this.GetDataAccessAttribute(type);
+        DataAccessAttribute attribute = this.GetDataAccessAttribute<DataAccessAttribute>(type);
         AddConditionValue(column, attribute, value.ToString(), equal);
     }
 
     /// <summary>
+    /// Conditional statement (in) additional configuration
     /// 条件文(in)追加設定
     /// </summary>
     /// <param name="column"></param>
-    /// <param name="value"></param>
-    /// <param name="andOr"></param>
+    /// <param name="values"></param>
+    /// <param name="type"></param>
+    /// <param name="isAnd"></param>
+    /// <param name="equal"></param>
     public void AddInCondition(string column, string[] values, Type type, bool isAnd, bool equal = true)
     {
         if (values == null) return;
         this.AddOperator(isAnd);
-        DataAccessAttribute attribute = this.GetDataAccessAttribute(type);
+        DataAccessAttribute attribute = this.GetDataAccessAttribute<DataAccessAttribute>(type);
         AddInConditionValue(column, attribute, values, equal);
     }
 
     /// <summary>
+    /// Condition value setting
     /// 条件値設定
     /// </summary>
     /// <param name="column"></param>
@@ -149,11 +164,7 @@ public class DataAccess : SingletonComponent<DataAccess>
     /// <param name="equal"></param>
     private void AddConditionValue(string column, DataAccessAttribute attribute, string value, bool equal)
     {
-        // エスケープ処理
-        if (value.Contains("'"))
-        {
-            value = value.Replace("'", "''");
-        }
+        value = this.EscapeSingleQuotation(value.ToString());
 
         if (equal)
         {
@@ -166,20 +177,18 @@ public class DataAccess : SingletonComponent<DataAccess>
     }
 
     /// <summary>
+    /// Condition value (in) setting
     /// 条件値(in)設定
     /// </summary>
     /// <param name="column"></param>
     /// <param name="attribute"></param>
-    /// <param name="value"></param>
+    /// <param name="values"></param>
+    /// <param name="equal"></param>
     private void AddInConditionValue(string column, DataAccessAttribute attribute, string[] values, bool equal)
     {
-        // エスケープ
         for (int i = 0; i < values.Length; i++)
         {
-            if (values[i].Contains("'"))
-            {
-                values[i] = values[i].Replace("'", "''");
-            }
+            values[i] = EscapeSingleQuotation(values[i]);
         }
 
         if (equal)
@@ -193,7 +202,8 @@ public class DataAccess : SingletonComponent<DataAccess>
     }
 
     /// <summary>
-    /// And Or 設定
+    /// And Or statement setting
+    /// And Or 文設定
     /// </summary>
     /// <param name="andOr"></param>
     private void AddOperator(bool isAnd)
@@ -217,19 +227,19 @@ public class DataAccess : SingletonComponent<DataAccess>
 
     #endregion
 
-    #region テーブル結合
+    #region テーブル結合 Add join table
 
     /// <summary>
-    /// 結合テーブル追加
-    /// And結合のみ
+    /// Add join table (And join only )
+    /// 結合テーブル追加 (And結合のみ)
     /// </summary>
     /// <param name="baseType"></param>
-    /// <param name="joinColumns">同名列</param>
+    /// <param name="joinColumns">The same name row ,同名列</param>
     /// <param name="isInner"></param>
     public void AddJoinTable(Type baseType, Type joinType, string[] joinColumns, bool isInner = true)
     {
-        DataAccessAttribute attribite = this.GetDataAccessAttribute(joinType);
-        string tableName = this.GetDataAccessAttribute(baseType).TableName;
+        DataAccessAttribute attribite = this.GetDataAccessAttribute<DataAccessAttribute>(joinType);
+        string tableName = this.GetDataAccessAttribute<DataAccessAttribute>(baseType).TableName;
         string joinTableType = (isInner) ? "inner" : "left";
         StringBuilder joinConditions = new StringBuilder();
 
@@ -245,8 +255,8 @@ public class DataAccess : SingletonComponent<DataAccess>
     }
 
     /// <summary>
+    /// Add join table
     /// 結合テーブル追加
-    /// And結合のみ
     /// </summary>
     /// <param name="baseType"></param>
     /// <param name="joinColumns">同名列</param>
@@ -257,8 +267,8 @@ public class DataAccess : SingletonComponent<DataAccess>
     }
 
     /// <summary>
+    /// Add join table
     /// 結合テーブル追加
-    /// And結合のみ
     /// </summary>
     /// <param name="baseType"></param>
     /// <param name="joinType"></param>
@@ -271,8 +281,8 @@ public class DataAccess : SingletonComponent<DataAccess>
     }
 
     /// <summary>
+    /// Add join table(private)
     /// 結合テーブル追加(private)
-    /// And結合のみ
     /// </summary>
     /// <param name="baseType"></param>
     /// <param name="joinType"></param>
@@ -281,8 +291,8 @@ public class DataAccess : SingletonComponent<DataAccess>
     /// <param name="isInner"></param>
     private void AddJoin(Type baseType, Type joinType, string baseColumn, string joinColumn, bool isInner = true)
     {
-        string joinTableName = this.GetDataAccessAttribute(joinType).TableName;
-        string baseTableName = this.GetDataAccessAttribute(baseType).TableName;
+        string joinTableName = this.GetDataAccessAttribute<DataAccessAttribute>(joinType).TableName;
+        string baseTableName = this.GetDataAccessAttribute<DataAccessAttribute>(baseType).TableName;
         string joinTableType = (isInner) ? "inner" : "left";
         StringBuilder joinConditions = new StringBuilder();
         joinConditions.Append(string.Format("{0}.{1} = {2}.{3}", baseTableName, baseColumn, joinTableName, joinColumn));
@@ -292,7 +302,8 @@ public class DataAccess : SingletonComponent<DataAccess>
     }
 
     /// <summary>
-    /// 結合時セレクト列を回収
+    /// Add a column bound to when joining the table .
+    /// テーブル結合時セレクト列を回収
     /// </summary>
     /// <param name="type"></param>
     private void AddSelectType(Type type)
@@ -305,49 +316,55 @@ public class DataAccess : SingletonComponent<DataAccess>
 
     #endregion
 
-    #region ソート設定
+    #region ソート設定 Sort settings
 
     /// <summary>
+    /// Add the sort field
     /// ソート項目追加
     /// </summary>
-    public void AddOrderByColumns(string column, Type type)
+    /// <param name="column"></param>
+    /// <param name="type"></param>
+    /// <param name="isAsc"></param>
+    public void AddOrderByColumns(string column, Type type, bool isAsc)
     {
-        // 下記の処理をやるよりだったら素直にList<T>を使った方が利口ではないだろうか？
         string[] baseArray = this.OrderByColumns;
-
         string[] newArray = new string[this.OrderByColumns.Length + 1];
-
-        //配列の要素をコピーする
+        string format = "{0}.{1}" + (isAsc ? " asc" : " desc");
         Array.Copy(baseArray, newArray, Math.Min(baseArray.Length, newArray.Length));
-        //できた配列をintArrayに戻す
         this.OrderByColumns = newArray;
 
-        this.OrderByColumns[this.OrderByColumns.Length - 1] = string.Format("{0}.{1}", this.GetDataAccessAttribute(type).TableName, column);
+        this.OrderByColumns[this.OrderByColumns.Length - 1] = string.Format(format, this.GetDataAccessAttribute<DataAccessAttribute>(type).TableName, column);
     }
 
     /// <summary>
-    /// ソート項目を設定(ソート対象の列が全て同じ場合のみ)
+    /// Set the sort item
+    /// ソート項目を設定
     /// </summary>
-    /// <param name="columns"></param>
+    /// <param name="columns">
+    /// It is required is the name of the property of the same class .
+    /// 同じクラスのプロパティ名であること
+    /// </param>
     /// <param name="type"></param>
-    public void SetOrderByColumns(string[] columns, Type type)
+    public void SetOrderByColumns(string[] columns, Type type, bool isAsc)
     {
         string[] orderColumns = new string[columns.Length];
-        string tableName = this.GetDataAccessAttribute(type).TableName;
+        string tableName = this.GetDataAccessAttribute<DataAccessAttribute>(type).TableName;
+        string format = "{0}.{1}" + (isAsc ? " asc" : " desc");
 
         for (int i = 0; i < columns.Length; i++)
         {
-            orderColumns[i] = string.Format("{0}.{1}", tableName, columns[i]);
+            orderColumns[i] = string.Format(format, tableName, columns[i]);
         }
         this.OrderByColumns = orderColumns;
     }
 
     #endregion
 
-    #region セレクト文発行
+    #region セレクト文発行 Issue select statement
 
     /// <summary>
-    /// 手動生成セレクトSQL文発行。複雑なSQLを発行する際に使用することを想定
+    /// Issued manually-generated select statement
+    /// 手動生成セレクトSQL文発行。
     /// </summary>
     /// <returns></returns>
     public List<T> GetDataList<T>(string sql)
@@ -362,10 +379,12 @@ public class DataAccess : SingletonComponent<DataAccess>
         {
             Debug.Log(ex.Message + " " + sql);
         }
+
         return DataBinding<T>.DataTableToObjectList(dataTable);
     }
 
     /// <summary>
+    /// Issue select statement
     /// セレクトSQL文発行
     /// </summary>
     /// <typeparam name="T"></typeparam>
@@ -384,7 +403,6 @@ public class DataAccess : SingletonComponent<DataAccess>
         }
         finally
         {
-            Debug.Log(this.ExecutetSql.ToString());
             this.Init(this.BaseType);
         }
 
@@ -392,6 +410,7 @@ public class DataAccess : SingletonComponent<DataAccess>
     }
 
     /// <summary>
+    /// Issue select statement
     /// セレクトSQL文発行
     /// </summary>
     /// <returns></returns>
@@ -402,7 +421,6 @@ public class DataAccess : SingletonComponent<DataAccess>
             this.CreateSelectSql();
             SqliteDatabase sqliteDataBase = new SqliteDatabase(CONNECT_TABLE);
             this.SelectTable = sqliteDataBase.ExecuteQuery(this.ExecutetSql.ToString());
-            Debug.Log(this.ExecutetSql.ToString());
         }
         catch (SqliteException ex)
         {
@@ -417,6 +435,7 @@ public class DataAccess : SingletonComponent<DataAccess>
     }
 
     /// <summary>
+    /// Issued manually-generated select statement
     /// セレクトSQL文発行
     /// </summary>
     /// <returns></returns>
@@ -440,6 +459,7 @@ public class DataAccess : SingletonComponent<DataAccess>
     }
 
     /// <summary>
+    /// Issue select statements.Get the first data
     /// セレクトSQL文発行
     /// </summary>
     /// <typeparam name="T"></typeparam>
@@ -476,6 +496,7 @@ public class DataAccess : SingletonComponent<DataAccess>
     }
 
     /// <summary>
+    /// Get the data without duplication from the target column
     /// 対象列から重複せずにデータを取得
     /// </summary>
     /// <param name="column"></param>
@@ -486,7 +507,7 @@ public class DataAccess : SingletonComponent<DataAccess>
         try
         {
             string groupSql = "select {0} from {1} group by {2}";
-            this.ExecutetSql.AppendLine(string.Format(groupSql, column, this.GetDataAccessAttribute(type).TableName, column));
+            this.ExecutetSql.AppendLine(string.Format(groupSql, column, this.GetDataAccessAttribute<DataAccessAttribute>(type).TableName, column));
             SqliteDatabase sqliteDataBase = new SqliteDatabase(CONNECT_TABLE);
             this.SelectTable = sqliteDataBase.ExecuteQuery(this.ExecutetSql.ToString());
 
@@ -513,6 +534,7 @@ public class DataAccess : SingletonComponent<DataAccess>
     }
 
     /// <summary>
+    /// Unique data presence check
     /// ユニークデータ存在チェック
     /// </summary>
     /// <param name="component"></param>
@@ -523,7 +545,7 @@ public class DataAccess : SingletonComponent<DataAccess>
         {
             string countColumn = "Count";
             string countSql = "select count(*) as {0} from {1}";
-            this.ExecutetSql.AppendLine(string.Format(countSql, countColumn, this.GetDataAccessAttribute(component.GetType()).TableName));
+            this.ExecutetSql.AppendLine(string.Format(countSql, countColumn, this.GetDataAccessAttribute<DataAccessAttribute>(component.GetType()).TableName));
 
             this.GetPrimaryKeyValue(component);
             this.CreatePrimaryWhere(component.GetType());
@@ -543,12 +565,13 @@ public class DataAccess : SingletonComponent<DataAccess>
     }
 
     /// <summary>
+    /// Select SQL statement generation
     /// セレクトSQL文生成
     /// </summary>
     private void CreateSelectSql()
     {
         this.ExecutetSql = new StringBuilder();
-        DataAccessAttribute attribute = this.GetDataAccessAttribute(this.BaseType);
+        DataAccessAttribute attribute = this.GetDataAccessAttribute<DataAccessAttribute>(this.BaseType);
         ExecutetSql.AppendLine(string.Format(SELECT_SQL, this.CreateSelectColumn(), attribute.TableName));
         ExecutetSql.AppendLine(this.JoinSql.ToString());
         ExecutetSql.AppendLine(this.WhereSql.ToString());
@@ -557,9 +580,11 @@ public class DataAccess : SingletonComponent<DataAccess>
         {
             ExecutetSql.AppendLine(string.Format(ORDER_BY_SQL, string.Join(",", this.OrderByColumns)));
         }
+        Debug.Log(this.ExecutetSql.ToString());
     }
 
     /// <summary>
+    /// Generating a select SQL Retsubun
     /// セレクトSQL列文を生成
     /// </summary>
     /// <returns></returns>
@@ -587,9 +612,10 @@ public class DataAccess : SingletonComponent<DataAccess>
 
     #endregion
 
-    #region インサート文発行
+    #region インサート文発行 Insert SQL issue
 
     /// <summary>
+    /// Insert SQL issue
     /// インサートSQL発行
     /// </summary>
     /// <param name="component"></param>
@@ -608,6 +634,7 @@ public class DataAccess : SingletonComponent<DataAccess>
     }
 
     /// <summary>
+    /// Multiple issue an insert SQL
     /// インサートSQLを複数発行
     /// </summary>
     /// <param name="componentList"></param>
@@ -637,30 +664,30 @@ public class DataAccess : SingletonComponent<DataAccess>
     }
 
     /// <summary>
+    /// Insert SQL statement generation
     /// インサートSQL文生成
     /// </summary>
     /// <param name="component"></param>
     private void CreateInsertSql(object component)
     {
         this.ExecutetSql = new StringBuilder();
-        string sql = string.Format(INSERT_SQL, this.GetDataAccessAttribute(component.GetType()).TableName, this.GetInsertUpdateSql(component, true));
+        string sql = string.Format(INSERT_SQL, this.GetDataAccessAttribute<DataAccessAttribute>(component.GetType()).TableName, this.GetInsertUpdateSql(component, true));
         this.ExecutetSql.AppendLine(sql);
-        //this.ExecutetSql.AppendLine(this.GetDateFormat());
-        //this.ExecutetSql.AppendLine(this.GetDateFormat());
         Debug.Log(this.ExecutetSql.ToString());
     }
 
     #endregion
 
-    #region アップデート文発行
+    #region アップデート文発行 Updates SQL issue
 
     /// <summary>
+    /// Updates SQL issue
     /// アップデートSQL発行
-    /// MonoBehaviour
     /// </summary>
     public void UpdateSql(object component)
     {
         SqliteDatabase sqliteDataBase = new SqliteDatabase(CONNECT_TABLE);
+        // TransactionStart
         // トランザクション開始
         sqliteDataBase.TransactionStart();
         try
@@ -671,6 +698,7 @@ public class DataAccess : SingletonComponent<DataAccess>
         catch (SqliteException ex)
         {
             Debug.Log(ex.Message + " " + this.ExecutetSql.ToString());
+            // TransactionRollBack
             // ロールバック
             sqliteDataBase.TransactionRollBack();
         }
@@ -678,11 +706,13 @@ public class DataAccess : SingletonComponent<DataAccess>
         {
             this.Init(component.GetType());
         }
+        // TransactionCommit
         // コミット
         sqliteDataBase.TransactionCommit();
     }
 
     /// <summary>
+    /// Multiple issued an update SQL. Primary key No other than the specified .
     /// アップデートSQLを複数発行。プライマリキー指定以外不可。
     /// </summary>
     /// <param name="componentList"></param>
@@ -690,6 +720,7 @@ public class DataAccess : SingletonComponent<DataAccess>
     {
         SqliteDatabase sqliteDataBase = new SqliteDatabase(CONNECT_TABLE);
         // トランザクション開始
+        // TransactionStart
         sqliteDataBase.TransactionStart();
         this.WhereSql = new StringBuilder();
         try
@@ -713,6 +744,7 @@ public class DataAccess : SingletonComponent<DataAccess>
         {
             Debug.Log(ex.Message + " " + this.ExecutetSql.ToString());
             // ロールバック
+            // TransactionRollBack
             sqliteDataBase.TransactionRollBack();
         }
         finally
@@ -720,17 +752,19 @@ public class DataAccess : SingletonComponent<DataAccess>
             this.Init(componentList[0].GetType());
         }
         // コミット
+        // TransactionCommit
         sqliteDataBase.TransactionCommit();
     }
 
     /// <summary>
-    /// アップデートSQL文生成
+    /// Update SQL statement generation
+    /// アップデートSQL文生成 
     /// </summary>
     /// <param name="component"></param>
     private void CreateUpdateSql(object component)
     {
         this.ExecutetSql = new StringBuilder();
-        string tableName = this.GetDataAccessAttribute(component.GetType()).TableName;
+        string tableName = this.GetDataAccessAttribute<DataAccessAttribute>(component.GetType()).TableName;
         string sql = string.Format(UPDATE_SQL, tableName);
         this.ExecutetSql.AppendLine(sql);
         this.ExecutetSql.AppendLine(this.GetInsertUpdateSql(component, false));
@@ -740,14 +774,20 @@ public class DataAccess : SingletonComponent<DataAccess>
 
     #endregion
 
-    #region デリート文発行
+    #region デリート文発行 Issued delete SQL statement
 
     /// <summary>
+    /// Issued delete SQL statement
     /// デリートSQL文発行。
     /// </summary>
     /// <param name="component"></param>
     public void Delete(object component)
     {
+        if(ChkDeleteImpossible(component.GetType()))
+        {
+            return;
+        }
+
         SqliteDatabase sqliteDataBase = new SqliteDatabase(CONNECT_TABLE);
         sqliteDataBase.TransactionStart();
         try
@@ -768,14 +808,21 @@ public class DataAccess : SingletonComponent<DataAccess>
     }
 
     /// <summary>
+    /// Multiple issue a delete SQL. Primary key No other than the specified .
     /// デリートSQLを複数発行。プライマリキー指定以外不可。
     /// </summary>
     /// <typeparam name="T"></typeparam>
     /// <param name="componentList"></param>
     public void DeleteMulti<T>(List<T> componentList)
     {
+        if (ChkDeleteImpossible(typeof(T)))
+        {
+            return;
+        }
+
         SqliteDatabase sqliteDataBase = new SqliteDatabase(CONNECT_TABLE);
         // トランザクション開始
+        // TransactionStart
         sqliteDataBase.TransactionStart();
         this.WhereSql = new StringBuilder();
         try
@@ -799,6 +846,7 @@ public class DataAccess : SingletonComponent<DataAccess>
         {
             Debug.Log(ex.Message + " " + this.ExecutetSql.ToString());
             // ロールバック
+            // TransactionRollBack
             sqliteDataBase.TransactionRollBack();
         }
         finally
@@ -806,17 +854,19 @@ public class DataAccess : SingletonComponent<DataAccess>
             this.Init(componentList[0].GetType());
         }
         // コミット
+        // TransactionCommit
         sqliteDataBase.TransactionCommit();
     }
 
     /// <summary>
+    /// Delete SQL statement generation
     /// デリートSQL文生成
     /// </summary>
     /// <param name="component"></param>
     private void CreateDeleteSql(object component)
     {
         this.ExecutetSql = new StringBuilder();
-        string tableName = this.GetDataAccessAttribute(component.GetType()).TableName;
+        string tableName = this.GetDataAccessAttribute<DataAccessAttribute>(component.GetType()).TableName;
         string sql = string.Format(DELETE_SQL, tableName);
         this.ExecutetSql.AppendLine(sql);
 
@@ -825,19 +875,38 @@ public class DataAccess : SingletonComponent<DataAccess>
         Debug.Log(this.ExecutetSql.ToString());
     }
 
+    /// <summary>
+    /// Or can be deleted check
+    /// 削除できるかチェック
+    /// </summary>
+    /// <param name="type"></param>
+    /// <returns></returns>
+    private bool ChkDeleteImpossible(Type type)
+    {
+        if (this.GetDataAccessAttribute<DeleteImpossible>(type) != null)
+        {
+            Debug.Log("Data in this table can not be deleted");
+            return true;
+        }
+
+        return false;
+    }
+
     #endregion
 
-    #region 採番
+    #region 採番 Numbering
 
     /// <summary>
-    /// 対象列を採番
+    /// Numbering the target column
+    /// 対象列を採番(数値)
     /// </summary>
+    /// <param name="column"></param>
     /// <returns></returns>
     public string GetAssignNumber(string column)
     {
         string countColumn = "Count";
         string countSql = "select max(cast({0} as interger)) as " + countColumn + " from {1}";
-        this.ExecutetSql.Append(string.Format(countSql, column, this.GetDataAccessAttribute(this.BaseType).TableName));
+        this.ExecutetSql.Append(string.Format(countSql, column, this.GetDataAccessAttribute<DataAccessAttribute>(this.BaseType).TableName));
         SqliteDatabase sqliteDataBase = new SqliteDatabase(CONNECT_TABLE);
         this.SelectTable = sqliteDataBase.ExecuteQuery(this.ExecutetSql.ToString());
         PropertyInfo propertyInfo = this.BaseType.GetProperty(column);
@@ -846,7 +915,7 @@ public class DataAccess : SingletonComponent<DataAccess>
             Debug.Log("not found assign column");
             return string.Empty;
         }
-        DataPropertyAttribute attribute = this.GetDataPropertyAttribute(propertyInfo);
+        DataPropertyAttribute attribute = this.GetDataPropertyAttribute<DataPropertyAttribute>(propertyInfo);
 
         if (this.SelectTable.Rows.Count.Equals(0))
         {
@@ -860,6 +929,7 @@ public class DataAccess : SingletonComponent<DataAccess>
     }
 
     /// <summary>
+    /// Forming a numbering number
     /// 採番番号を形成
     /// </summary>
     /// <param name="maxLength"></param>
@@ -884,12 +954,14 @@ public class DataAccess : SingletonComponent<DataAccess>
 
     #endregion
 
-    #region 条件生成
+    #region 条件生成 Condition generation
 
     /// <summary>
+    /// Updates , common the condition generation of delete statement .
     /// アップデート、デリート文の条件生成を共通化。
     /// </summary>
     /// <param name="tableName"></param>
+    /// <param name="componet"></param>
     private void CreateDeleteUpdateWhere(string tableName, object componet)
     {
         if (!this.WhereSql.ToString().Equals(string.Empty))
@@ -903,15 +975,15 @@ public class DataAccess : SingletonComponent<DataAccess>
         }
         else
         {
-            // プライマリキーより条件文作成
             CreatePrimaryWhere(componet.GetType());
         }
     }
 
     /// <summary>
+    /// Create conditional statements from the primary key
     /// プライマリキーより条件文作成
     /// </summary>
-    /// <param name="componet"></param>
+    /// <param name="type"></param>
     private void CreatePrimaryWhere(Type type)
     {
         foreach (string key in PrimarySql.Keys)
@@ -924,9 +996,11 @@ public class DataAccess : SingletonComponent<DataAccess>
     #endregion
 
     /// <summary>
+    /// Registration , update for SQL contents generation . Primary key recovery .
     /// 登録、更新用SQL中身生成。プライマリキー回収。
     /// </summary>
     /// <param name="component"></param>
+    /// <param name="isInsert"></param>
     /// <returns></returns>
     private string GetInsertUpdateSql(object component, bool isInsert)
     {
@@ -942,12 +1016,13 @@ public class DataAccess : SingletonComponent<DataAccess>
         {
             if (propertyInfo.DeclaringType.Equals(type))
             {
-                DataPropertyAttribute attribute = this.GetDataPropertyAttribute(propertyInfo);
+                DataPropertyAttribute attribute = this.GetDataPropertyAttribute<DataPropertyAttribute>(propertyInfo);
                 if (attribute != null)
                 {
                     object value = this.GetSqliteTypeValue(attribute, propertyInfo, component);
 
                     // プライマリキー取得
+                    // Primary key acquisition
                     if (attribute.IsPrimaryKey && !isInsert)
                     {
                         this.AddPrimaryKey(value, propertyInfo.Name);
@@ -965,13 +1040,13 @@ public class DataAccess : SingletonComponent<DataAccess>
                         propertyBuilder.Append(",");
                     }
 
-                    // 登録
+                    // insert
                     if (isInsert)
                     {
                         stringBuilder.AppendLine(string.Format("'{0}'", (value == null) ? "" : value.ToString()));
                         propertyBuilder.AppendLine(propertyInfo.Name);
                     }
-                    // 更新
+                    // update
                     else
                     {
                         stringBuilder.AppendLine(string.Format(updateSql, propertyInfo.Name, value.ToString()));
@@ -1034,20 +1109,17 @@ public class DataAccess : SingletonComponent<DataAccess>
 
         if (value != null)
         {
-            // 'をエスケープする
-            if (value.ToString().Contains("'"))
-            {
-                value = value.ToString().Replace("'", "''");
-            }
+            value = this.EscapeSingleQuotation(value.ToString());
         }
 
         return value;
     }
 
     /// <summary>
-    /// テーブル操作SQL発行。
-    /// MonoBehaviour
+    /// Data manipulation SQL issue
+    /// データ操作SQL発行。
     /// </summary>
+    /// <param name="sql"></param>
     public void SqlExecuteNonQuery(string sql)
     {
         try
@@ -1061,9 +1133,10 @@ public class DataAccess : SingletonComponent<DataAccess>
         }
     }
 
-    #region プライマリーキー、値、SQLite列回収
+    #region プライマリーキー、値、SQLite列回収 Primary key , value , SQLite column recovery 
 
     /// <summary>
+    /// Recovering the primary key and values
     /// プライマリキーと値を回収
     /// </summary>
     private void GetPrimaryKeyValue(object component)
@@ -1074,7 +1147,7 @@ public class DataAccess : SingletonComponent<DataAccess>
         {
             if (propertyInfo.DeclaringType.Equals(type))
             {
-                DataPropertyAttribute attribute = this.GetDataPropertyAttribute(propertyInfo);
+                DataPropertyAttribute attribute = this.GetDataPropertyAttribute<DataPropertyAttribute>(propertyInfo);
                 if (attribute != null)
                 {
                     if (attribute.IsPrimaryKey)
@@ -1087,6 +1160,7 @@ public class DataAccess : SingletonComponent<DataAccess>
     }
 
     /// <summary>
+    /// Add a primary key
     /// プライマリキーを追加
     /// </summary>
     /// <param name="key"></param>
@@ -1111,7 +1185,8 @@ public class DataAccess : SingletonComponent<DataAccess>
     }
 
     /// <summary>
-    /// SQLiteに含まれる列を取得
+    /// Get the column that is included in the SQLiteComponent
+    /// SQLiteComponentに含まれる列を取得
     /// </summary>
     /// <param name="type"></param>
     /// <returns></returns>
@@ -1120,12 +1195,12 @@ public class DataAccess : SingletonComponent<DataAccess>
         StringBuilder stringBuilder = new StringBuilder();
         bool first = true;
         PropertyInfo[] propertyInfoArray = type.GetProperties();
-        string tableName = this.GetDataAccessAttribute(type).TableName;
+        string tableName = this.GetDataAccessAttribute<DataAccessAttribute>(type).TableName;
         string format = "{0}.{1}";
 
         foreach (PropertyInfo propertyInfo in propertyInfoArray)
         {
-            DataPropertyAttribute attribute = this.GetDataPropertyAttribute(propertyInfo);
+            DataPropertyAttribute attribute = this.GetDataPropertyAttribute<DataPropertyAttribute>(propertyInfo);
 
             if (attribute != null)
             {
@@ -1148,34 +1223,56 @@ public class DataAccess : SingletonComponent<DataAccess>
     #endregion
 
     /// <summary>
-    /// 登録更新日付のファーマット
+    /// The format of the registration renewal date
+    /// 登録更新日付のフォーマット
     /// </summary>
+    /// <param name="dateTime"></param>
     /// <returns></returns>
     private string GetDateFormat(DateTime dateTime)
     {
         return dateTime.ToString("yyyy/MM/dd hh:mm");
     }
 
-    #region 属性取得
+    /// <summary>
+    // Single quotes escaping
+    // 'エスケープ処理
+    /// </summary>
+    /// <param name="value"></param>
+    /// <returns></returns>
+    private string EscapeSingleQuotation(object value)
+    {
+        if (value.ToString().Contains("'"))
+        {
+            value = value.ToString().Replace("'", "''");
+        }
+
+        return value.ToString();
+    }
+
+    #region 属性取得 Attribute acquisition
 
     /// <summary>
+    /// Acquisition connection attributes
     /// 接続属性取得
     /// </summary>
     /// <param name="type"></param>
     /// <returns></returns>
-    private DataAccessAttribute GetDataAccessAttribute(Type type)
+    private T GetDataAccessAttribute<T>(Type type)
     {
-        return (DataAccessAttribute)Attribute.GetCustomAttribute(type, typeof(DataAccessAttribute));
+        object attribute = Attribute.GetCustomAttribute(type, typeof(T));
+        return (T)attribute;
     }
 
     /// <summary>
-    /// Sqliteデータ属性取得
+    /// Sqlite acquired data property attributes
+    /// Sqliteデータプロパティ属性取得
     /// </summary>
     /// <param name="propertyInfo"></param>
     /// <returns></returns>
-    private DataPropertyAttribute GetDataPropertyAttribute(PropertyInfo propertyInfo)
+    private T GetDataPropertyAttribute<T>(PropertyInfo propertyInfo)
     {
-        return (DataPropertyAttribute)Attribute.GetCustomAttribute(propertyInfo, typeof(DataPropertyAttribute));
+        object attribute = Attribute.GetCustomAttribute(propertyInfo, typeof(T));
+        return (T)attribute;
     }
 
     #endregion
