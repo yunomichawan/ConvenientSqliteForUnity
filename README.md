@@ -1,36 +1,60 @@
-# ConvenientSqliteForUnity
+# SqliteをUnity上で簡単に扱えるライブラリ
 ===
 
-OverView
+概要 - OverView -
 
-・You can deal with Sqlite easily with Unity on Using this library .
+・このライブラリを導入することでSqlite文の自動生成と実行を行います。
 
-・This library was created based on the [SQLiteUnityKit] (https://github.com/Busta117/SQLiteUnityKit) have been distributed in this site .
+・このライブラリは[SQLiteUnityKit] (https://github.com/Busta117/SQLiteUnityKit)をベースにして作成されています。
 
-## Description
+## 説明  - Description -
 
-・It performs automatic generation of SQL statements .(Except for the SQL statement of the table operation system)
+・テーブルに合わせたクラスを作成することでセレクト、登録、更新、削除に関するSqlite文の実行をサポートします。
 
-・Create a class tailored to the table , and then set the value automatically to the class .
+・他にも番号の採番、ユニークデータ存在チェックを行う関数が用意されています。データを登録する際に使用してみてください。
 
-## Demo
+・手動で作成したSqlite文を実行する場合は、複雑なSqlte文（サブクエリ等）を実行する場合のみ使用することをお勧めします。
 
-## VS. 
+※注意
 
-## Requirement
+・テーブル操作系（テーブル作成、削除、列追加等）のSqlite文は一切サポートしておりません。
 
-・To use this library [SQLiteUnityKit] (https://github.com/Busta117/SQLiteUnityKit) will be required .
+## 参考にしたフレームワーク  - Framework that was in reference -
 
-## Usage
+・このライブラリは作成者が以下のフレームワークを参考（参考にした部分はかなり少ないですが...）に作成しました。
 
+・[Entity Framework](https://msdn.microsoft.com/ja-jp/library/bb399567.aspx)
 
+・[Seasar2](http://www.seasar.org/).
 
-## Contribution
+## 必要条件 Requirements
 
+・このライブラリを使用するには[SQLiteUnityKit](https://github.com/Busta117/SQLiteUnityKit)に関する知識が必要になります。
 
+・[SQLiteUnityKit](https://github.com/Busta117/SQLiteUnityKit)の使い方についてはこちらのページを参照してください。[UnityでSQLiteを扱う方法](http://qiita.com/hiroyuki7/items/5335e391c9ed397aee50
 
-## Licence
+## 使い方 - Usage -
 
+・使い方に関する記事を作成しましたのでこちらを参照してください。[]()
 
-## Author
+・このプロジェクト内にサンプルとなるソースファイルとデータベースが配置されています。
+	サンプルファイル一覧
+	 ・Sample.db 				… データベースファイル。サンプルとなるテーブルが作成されています。
+	 ・CharacterData.cs 		… データベースの「CharacterTable」を基に作成されたクラス。
+	 ・MasterTable.cs 			… データベースの「MasterTable」を基に作成されたクラス。
+	 ・PartyCharacterTable.cs 	… データベースの「PartyCharacterTable」を基に作成されたクラス。
+	 ・PartyTable.cs 			… データベースの「PartyTable」を基に作成されたクラス。
+	 ・SqliteTableService.cs 	… データベース操作をまとめたファイル。
+	 ・SqliteTestScript.cs 		… Unity上で動作確認をするためのファイル。
 
+## ライセンス - Licence -
+
+・[MIT](https://github.com/yunomichawan/ConvenientSqliteForUnity/blob/master/LICENSE)
+
+・MITライセンスとは？という方はこちらのページを参照してください。[MITライセンスについて](http://wisdommingle.com/mit-license/)
+
+## 作成者 - Author -
+
+湯呑み茶碗 - yunomichawan - <ddlkgjbdnm@gmail.com>
+[twitter]()
+[開発ブログ]()
