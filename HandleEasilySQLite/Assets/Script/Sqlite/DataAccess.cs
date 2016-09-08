@@ -32,7 +32,6 @@ public class DataAccess : SingletonComponent<DataAccess>
     private Dictionary<string, string> PrimarySql { get; set; }
     private string[] OrderByColumns { get; set; }
     private Type BaseType;
-    private DataTable SelectTable { get; set; }
 
     #region 初期化 Initialization
 
@@ -391,11 +390,12 @@ public class DataAccess : SingletonComponent<DataAccess>
     /// <returns></returns>
     public List<T> GetDataList<T>()
     {
+        DataTable dataTable = new DataTable();
         try
         {
             this.CreateSelectSql();
             SqliteDatabase sqliteDataBase = new SqliteDatabase(CONNECT_TABLE);
-            this.SelectTable = sqliteDataBase.ExecuteQuery(this.ExecutetSql.ToString());
+            dataTable = sqliteDataBase.ExecuteQuery(this.ExecutetSql.ToString());
         }
         catch (SqliteException ex)
         {
@@ -406,7 +406,7 @@ public class DataAccess : SingletonComponent<DataAccess>
             this.Init(this.BaseType);
         }
 
-        return DataBinding<T>.DataTableToObjectList(this.SelectTable);
+        return DataBinding<T>.DataTableToObjectList(dataTable);
     }
 
     /// <summary>
@@ -416,11 +416,12 @@ public class DataAccess : SingletonComponent<DataAccess>
     /// <returns></returns>
     public DataTable GetDataTable()
     {
+        DataTable dataTable = new DataTable();
         try
         {
             this.CreateSelectSql();
             SqliteDatabase sqliteDataBase = new SqliteDatabase(CONNECT_TABLE);
-            this.SelectTable = sqliteDataBase.ExecuteQuery(this.ExecutetSql.ToString());
+            dataTable = sqliteDataBase.ExecuteQuery(this.ExecutetSql.ToString());
         }
         catch (SqliteException ex)
         {
@@ -431,7 +432,7 @@ public class DataAccess : SingletonComponent<DataAccess>
             this.Init(this.BaseType);
         }
 
-        return this.SelectTable;
+        return dataTable;
     }
 
     /// <summary>
@@ -441,10 +442,11 @@ public class DataAccess : SingletonComponent<DataAccess>
     /// <returns></returns>
     public DataTable GetDataTable(string sql)
     {
+        DataTable dataTable = new DataTable();
         try
         {
             SqliteDatabase sqliteDataBase = new SqliteDatabase(CONNECT_TABLE);
-            this.SelectTable = sqliteDataBase.ExecuteQuery(sql);
+            dataTable = sqliteDataBase.ExecuteQuery(sql);
         }
         catch (SqliteException ex)
         {
@@ -455,7 +457,7 @@ public class DataAccess : SingletonComponent<DataAccess>
             this.Init(this.BaseType);
         }
 
-        return this.SelectTable;
+        return dataTable;
     }
 
     /// <summary>
@@ -468,18 +470,19 @@ public class DataAccess : SingletonComponent<DataAccess>
     {
         try
         {
+            DataTable dataTable = new DataTable();
             this.CreateSelectSql();
             SqliteDatabase sqliteDataBase = new SqliteDatabase(CONNECT_TABLE);
             Debug.Log(ExecutetSql.ToString());
-            this.SelectTable = sqliteDataBase.ExecuteQuery(this.ExecutetSql.ToString());
+            dataTable = sqliteDataBase.ExecuteQuery(this.ExecutetSql.ToString());
 
-            if (this.SelectTable.Rows.Count.Equals(0))
+            if (dataTable.Rows.Count.Equals(0))
             {
                 return default(T);
             }
 
             T data = (T)Activator.CreateInstance(typeof(T), new object[] { });
-            DataBinding<T>.DataRowToObject(this.SelectTable.Rows[0], data);
+            DataBinding<T>.DataRowToObject(dataTable.Rows[0], data);
 
             return data;
         }
@@ -496,6 +499,22 @@ public class DataAccess : SingletonComponent<DataAccess>
     }
 
     /// <summary>
+    /// データテーブルの1番目から指定の型でデータを取得
+    /// </summary>
+    /// <typeparam name="T"></typeparam>
+    /// <param name="dataTable"></param>
+    /// <returns></returns>
+    public T GetDataTableFirst<T>(DataTable dataTable)
+    {
+        T data = (T)Activator.CreateInstance(typeof(T), new object[] { });
+        if (!dataTable.Rows.Count.Equals(0))
+        {
+            DataBinding<T>.DataRowToObject(dataTable.Rows[0], data);
+        }
+        return data;
+    }
+
+    /// <summary>
     /// Get the data without duplication from the target column
     /// 対象列から重複せずにデータを取得
     /// </summary>
@@ -506,21 +525,22 @@ public class DataAccess : SingletonComponent<DataAccess>
     {
         try
         {
+            DataTable dataTable = new DataTable();
             string groupSql = "select {0} from {1} group by {2}";
             this.ExecutetSql.AppendLine(string.Format(groupSql, column, this.GetDataAccessAttribute<DataAccessAttribute>(type).TableName, column));
             SqliteDatabase sqliteDataBase = new SqliteDatabase(CONNECT_TABLE);
-            this.SelectTable = sqliteDataBase.ExecuteQuery(this.ExecutetSql.ToString());
+            dataTable = sqliteDataBase.ExecuteQuery(this.ExecutetSql.ToString());
 
-            if (SelectTable.Rows.Count.Equals(0))
+            if (dataTable.Rows.Count.Equals(0))
             {
                 return new string[] { };
             }
 
-            string[] dataArray = new string[this.SelectTable.Rows.Count];
+            string[] dataArray = new string[dataTable.Rows.Count];
 
-            for (int i = 0; i < this.SelectTable.Rows.Count; i++)
+            for (int i = 0; i < dataTable.Rows.Count; i++)
             {
-                dataArray[i] = this.SelectTable.Rows[i][column].ToString();
+                dataArray[i] = dataTable.Rows[i][column].ToString();
             }
 
             return dataArray;
@@ -543,6 +563,7 @@ public class DataAccess : SingletonComponent<DataAccess>
     {
         try
         {
+            DataTable dataTable = new DataTable();
             string countColumn = "Count";
             string countSql = "select count(*) as {0} from {1}";
             this.ExecutetSql.AppendLine(string.Format(countSql, countColumn, this.GetDataAccessAttribute<DataAccessAttribute>(component.GetType()).TableName));
@@ -551,9 +572,9 @@ public class DataAccess : SingletonComponent<DataAccess>
             this.CreatePrimaryWhere(component.GetType());
 
             SqliteDatabase sqliteDataBase = new SqliteDatabase(CONNECT_TABLE);
-            this.SelectTable = sqliteDataBase.ExecuteQuery(this.ExecutetSql.ToString());
+            dataTable = sqliteDataBase.ExecuteQuery(this.ExecutetSql.ToString());
 
-            int count = int.Parse(this.SelectTable.Rows[0][countColumn].ToString());
+            int count = int.Parse(dataTable.Rows[0][countColumn].ToString());
             return !count.Equals(0);
         }
         catch (SqliteException ex)
@@ -783,7 +804,7 @@ public class DataAccess : SingletonComponent<DataAccess>
     /// <param name="component"></param>
     public void Delete(object component)
     {
-        if(ChkDeleteImpossible(component.GetType()))
+        if (ChkDeleteImpossible(component.GetType()))
         {
             return;
         }
@@ -904,11 +925,12 @@ public class DataAccess : SingletonComponent<DataAccess>
     /// <returns></returns>
     public string GetAssignNumber(string column)
     {
+        DataTable dataTable = new DataTable();
         string countColumn = "Count";
         string countSql = "select max(cast({0} as interger)) as " + countColumn + " from {1}";
         this.ExecutetSql.Append(string.Format(countSql, column, this.GetDataAccessAttribute<DataAccessAttribute>(this.BaseType).TableName));
         SqliteDatabase sqliteDataBase = new SqliteDatabase(CONNECT_TABLE);
-        this.SelectTable = sqliteDataBase.ExecuteQuery(this.ExecutetSql.ToString());
+        dataTable = sqliteDataBase.ExecuteQuery(this.ExecutetSql.ToString());
         PropertyInfo propertyInfo = this.BaseType.GetProperty(column);
         if (propertyInfo == null)
         {
@@ -917,13 +939,13 @@ public class DataAccess : SingletonComponent<DataAccess>
         }
         DataPropertyAttribute attribute = this.GetDataPropertyAttribute<DataPropertyAttribute>(propertyInfo);
 
-        if (this.SelectTable.Rows.Count.Equals(0))
+        if (dataTable.Rows.Count.Equals(0))
         {
             return this.GetAssignNumberFormat(attribute.MaxLength, "1");
         }
         else
         {
-            int no = int.Parse(this.SelectTable.Rows[0][countColumn].ToString()) + 1;
+            int no = int.Parse(dataTable.Rows[0][countColumn].ToString()) + 1;
             return this.GetAssignNumberFormat(attribute.MaxLength, no.ToString());
         }
     }
@@ -1133,7 +1155,7 @@ public class DataAccess : SingletonComponent<DataAccess>
         }
     }
 
-    #region プライマリーキー、値、SQLite列回収 Primary key , value , SQLite column recovery 
+    #region プライマリーキー、値、SQLite列回収 Primary key , value , SQLite column recovery
 
     /// <summary>
     /// Recovering the primary key and values

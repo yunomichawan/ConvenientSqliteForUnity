@@ -6,7 +6,7 @@ using System.Text;
 /// <summary>
 /// Example
 /// Table operation class of sqlite
-/// Sqliteテーブル操作クラス
+/// Sqliteテーブルデータ操作クラス
 /// </summary>
 public class SqliteTableService
 {
@@ -40,7 +40,7 @@ public class SqliteTableService
         // SelectExample4
         // Run the SQL statement that was created .
         // 作成されたSQL文を実行します。
-        DataTable dataTable2 = DataAccess.Instance.GetDataTable("select * from CharacterTable");
+        DataTable dataTable2 = DataAccess.Instance.GetDataTable("select CharacterId,Name from CharacterTable");
         List<CharacterData> characterDataList4 = DataBinding<CharacterData>.DataTableToObjectList(dataTable2);
 
         return characterDataList;
@@ -55,6 +55,7 @@ public class SqliteTableService
     public static List<CharacterData> GetPartyCharacterList(string partyId)
     {
         DataAccess dataAccess = DataAccess.Instance;
+        // 最初にセレクトしたいテーブルで初期化
         dataAccess.Init(typeof(PartyTable));
         
         // It performs an internal table joins in PartyId
