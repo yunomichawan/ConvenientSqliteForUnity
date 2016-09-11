@@ -38,13 +38,20 @@
 ・使い方に関する記事を作成する予定です。
 
 ・このプロジェクト内にサンプルとなるソースファイルとデータベースが配置されています。
-サンプルファイル一覧
+# サンプルファイル一覧
+
 ・Sample.db 				… データベースファイル。サンプルとなるテーブルが作成されています。
+
 ・CharacterData.cs 			… データベースの「CharacterTable」を基に作成されたクラス。
+
 ・MasterTable.cs 			… データベースの「MasterTable」を基に作成されたクラス。
+
 ・PartyCharacterTable.cs 	… データベースの「PartyCharacterTable」を基に作成されたクラス。
+
 ・PartyTable.cs 			… データベースの「PartyTable」を基に作成されたクラス。
+
 ・SqliteTableService.cs 	… データベース操作をまとめたファイル。
+
 ・SqliteTestScript.cs 		… Unity上で動作確認をするためのファイル。
 
 ## ライセンス - Licence -
