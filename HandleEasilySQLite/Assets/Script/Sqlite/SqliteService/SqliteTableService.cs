@@ -65,6 +65,10 @@ public class SqliteTableService
         // It performs an internal table joins in CharacterId
         // CharacterIdでテーブルの内部結合を行う
         dataAccess.AddJoinTable(typeof(PartyCharacterTable), typeof(CharacterData), "CharacterId", "CharacterId");
+
+        // Set condition
+        // 条件を指定する
+        dataAccess.AddCondition("PartyId", partyId, typeof(PartyTable), true);
         
         // Get the bound table
         // 結合したテーブルを取得
